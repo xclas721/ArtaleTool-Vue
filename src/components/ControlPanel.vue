@@ -58,8 +58,9 @@
           prepend-icon="mdi-stop"
           size="large"
           class="text-h6 font-weight-bold"
+          :disabled="!scheduledKeys.some(key => key.isRunning)"
         >
-          停止所有定時按鍵
+          全結束
         </v-btn>
       </v-card-title>
       <v-card-text>
@@ -77,7 +78,13 @@
                     style="min-width: 120px"
                     @click="startKeyListening(i-1)"
                   >
-                    {{ scheduledKeys[i-1].key || (activeKeyField === i-1 ? '請按下按鍵...' : '點擊輸入按鍵') }}
+                    <template v-if="activeKeyField === i-1">
+                      <v-icon class="me-2" color="teal">mdi-keyboard</v-icon>
+                      請按下按鍵
+                    </template>
+                    <template v-else>
+                      {{ scheduledKeys[i-1].key || '點擊輸入按鍵' }}
+                    </template>
                   </v-btn>
                   <v-text-field
                     v-model="scheduledKeys[i-1].interval"
@@ -130,7 +137,13 @@
                     style="min-width: 120px"
                     @click="startKeyListening(i+2)"
                   >
-                    {{ scheduledKeys[i+2].key || (activeKeyField === i+2 ? '請按下按鍵...' : '點擊輸入按鍵') }}
+                    <template v-if="activeKeyField === i+2">
+                      <v-icon class="me-2" color="teal">mdi-keyboard</v-icon>
+                      請按下按鍵
+                    </template>
+                    <template v-else>
+                      {{ scheduledKeys[i+2].key || '點擊輸入按鍵' }}
+                    </template>
                   </v-btn>
                   <v-text-field
                     v-model="scheduledKeys[i+2].interval"
@@ -247,8 +260,7 @@
           <span class="text-h6">腳本列表</span>
         </div>
         <v-btn
-          color="indigo-darken-2"
-          variant="outlined"
+          color="primary"
           @click="refreshScriptList"
           prepend-icon="mdi-refresh"
           size="large"
@@ -1307,6 +1319,24 @@ onUnmounted(() => {
   padding: 16px;
   border-radius: 8px;
   border: 2px solid #e0e0e0;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.current-key-display .text-h6 {
+  margin-bottom: 16px;
+}
+
+.current-key-display .d-flex {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-key-display .text-grey {
+  font-size: 1.1rem;
+  opacity: 0.7;
 }
 
 .current-event {
@@ -1398,5 +1428,31 @@ onUnmounted(() => {
 :deep(.v-text-field .v-field__hint.running) {
   color: var(--v-theme-primary) !important;
   font-weight: 500 !important;
+}
+
+/* 按鍵選擇按鈕動畫 */
+:deep(.v-btn) {
+  transition: all 0.3s ease !important;
+}
+
+:deep(.v-btn:not(.v-btn--disabled):hover) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+:deep(.v-btn--active) {
+  animation: pulse 1.5s infinite !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 150, 136, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 150, 136, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 150, 136, 0);
+  }
 }
 </style> 
