@@ -70,7 +70,7 @@
               <v-card-text>
                 <div class="d-flex flex-column align-center">
                   <v-btn
-                    :color="activeKeyField === i-1 ? 'primary' : 'grey'"
+                    :color="activeKeyField === i-1 ? 'teal' : (scheduledKeys[i-1].key ? 'teal' : 'grey')"
                     variant="outlined"
                     :disabled="scheduledKeys[i-1].isRunning"
                     class="mb-2 text-h6 font-weight-bold"
@@ -88,7 +88,19 @@
                     hide-details
                     class="mb-2"
                     style="max-width: 120px"
+                    variant="outlined"
+                    density="comfortable"
+                    bg-color="surface"
+                    color="primary"
+                    :suffix="'秒'"
+                    :prefix="'每'"
                   ></v-text-field>
+                  <div v-if="scheduledKeys[i-1].isRunning" class="text-caption text-primary font-weight-medium mb-2">
+                    下次按鍵: {{ scheduledKeys[i-1].countdown }}秒
+                  </div>
+                  <div v-else class="text-caption text-medium-emphasis mb-2">
+                    最小 1 秒
+                  </div>
                   <v-btn
                     :color="scheduledKeys[i-1].isRunning ? 'error' : 'teal'"
                     @click="toggleScheduledKey(i-1)"
@@ -111,7 +123,7 @@
               <v-card-text>
                 <div class="d-flex flex-column align-center">
                   <v-btn
-                    :color="activeKeyField === i+2 ? 'primary' : 'grey'"
+                    :color="activeKeyField === i+2 ? 'teal' : (scheduledKeys[i+2].key ? 'teal' : 'grey')"
                     variant="outlined"
                     :disabled="scheduledKeys[i+2].isRunning"
                     class="mb-2 text-h6 font-weight-bold"
@@ -129,7 +141,19 @@
                     hide-details
                     class="mb-2"
                     style="max-width: 120px"
+                    variant="outlined"
+                    density="comfortable"
+                    bg-color="surface"
+                    color="primary"
+                    :suffix="'秒'"
+                    :prefix="'每'"
                   ></v-text-field>
+                  <div v-if="scheduledKeys[i+2].isRunning" class="text-caption text-primary font-weight-medium mb-2">
+                    下次按鍵: {{ scheduledKeys[i+2].countdown }}秒
+                  </div>
+                  <div v-else class="text-caption text-medium-emphasis mb-2">
+                    最小 1 秒
+                  </div>
                   <v-btn
                     :color="scheduledKeys[i+2].isRunning ? 'error' : 'teal'"
                     @click="toggleScheduledKey(i+2)"
@@ -331,46 +355,40 @@
       </v-card-text>
     </v-card>
 
-    <!-- 倒數計時對話框 -->
-    <v-dialog
-      v-model="countdownVisible"
-      persistent
-      max-width="300"
-    >
-      <v-card>
-        <v-card-text class="text-center">
-          <div class="text-h2 font-weight-bold">
-            {{ countdown }}
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-
     <!-- 刪除確認對話框 -->
     <v-dialog
       v-model="deleteDialogVisible"
       max-width="400"
+      transition="dialog-bottom-transition"
     >
-      <v-card>
-        <v-card-title>確認刪除</v-card-title>
-        <v-card-text>
+      <v-card class="rounded-lg">
+        <v-card-title class="text-h5 font-weight-bold pa-4 pb-2">
+          <v-icon color="error" class="me-2">mdi-alert-circle</v-icon>
+          確認刪除
+        </v-card-title>
+        <v-card-text class="text-body-1 pa-4 pt-2">
           確定要刪除腳本 "{{ scriptToDelete }}" 嗎？
+          <div class="text-caption text-medium-emphasis mt-2">
+            此操作無法復原
+          </div>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4 pt-2">
           <v-spacer></v-spacer>
           <v-btn
             color="grey-darken-1"
-            variant="text"
+            variant="tonal"
             @click="deleteDialogVisible = false"
+            class="text-none"
           >
             取消
           </v-btn>
           <v-btn
             color="error"
-            variant="text"
+            variant="elevated"
             @click="deleteScript"
+            class="text-none ms-2"
           >
-            確定
+            確定刪除
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -380,34 +398,108 @@
     <v-dialog
       v-model="renameDialogVisible"
       max-width="400"
+      transition="dialog-bottom-transition"
     >
-      <v-card>
-        <v-card-title>重命名腳本</v-card-title>
-        <v-card-text>
+      <v-card class="rounded-lg">
+        <v-card-title class="text-h5 font-weight-bold pa-4 pb-2">
+          <v-icon color="info" class="me-2">mdi-pencil</v-icon>
+          重命名腳本
+        </v-card-title>
+        <v-card-text class="pa-4 pt-2">
           <v-text-field
             v-model="newScriptName"
             label="新腳本名稱"
             :error-messages="renameError"
             @keyup.enter="confirmRename"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            class="mb-2"
           ></v-text-field>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-4 pt-2">
           <v-spacer></v-spacer>
           <v-btn
             color="grey-darken-1"
-            variant="text"
+            variant="tonal"
             @click="renameDialogVisible = false"
+            class="text-none"
           >
             取消
           </v-btn>
           <v-btn
             color="primary"
-            variant="text"
+            variant="elevated"
             @click="confirmRename"
+            class="text-none ms-2"
           >
             確定
           </v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 儲存腳本對話框 -->
+    <v-dialog
+      v-model="saveDialogVisible"
+      max-width="400"
+      transition="dialog-bottom-transition"
+    >
+      <v-card class="rounded-lg">
+        <v-card-title class="text-h5 font-weight-bold pa-4 pb-2">
+          <v-icon color="primary" class="me-2">mdi-content-save</v-icon>
+          儲存腳本
+        </v-card-title>
+        <v-card-text class="pa-4 pt-2">
+          <v-text-field
+            v-model="saveScriptName"
+            label="腳本名稱"
+            :error-messages="saveError"
+            @keyup.enter="confirmSave"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+            class="mb-2"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions class="pa-4 pt-2">
+          <v-spacer></v-spacer>
+          <v-btn
+            color="grey-darken-1"
+            variant="tonal"
+            @click="saveDialogVisible = false"
+            class="text-none"
+          >
+            取消
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            @click="confirmSave"
+            class="text-none ms-2"
+          >
+            確定
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- 倒數計時對話框 -->
+    <v-dialog
+      v-model="countdownVisible"
+      persistent
+      max-width="300"
+      transition="dialog-bottom-transition"
+    >
+      <v-card class="rounded-lg">
+        <v-card-text class="text-center pa-6">
+          <div class="text-h1 font-weight-bold text-primary">
+            {{ countdown }}
+          </div>
+          <div class="text-body-1 text-medium-emphasis mt-2">
+            準備開始播放
+          </div>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -437,6 +529,9 @@ const scriptToRename = ref('')
 const currentPlayingKey = ref(null)
 const currentPlayingIndex = ref(-1)
 const currentPressedKeys = ref([])
+const saveDialogVisible = ref(false)
+const saveScriptName = ref('')
+const saveError = ref('')
 let keyPollingInterval = null
 let countdownInterval = null
 let statusInterval = null
@@ -444,12 +539,12 @@ let statusCheckInterval = null
 
 // 定時按鍵相關
 const scheduledKeys = ref([
-  { key: 'Insert', interval: 100, isRunning: false, taskId: '' },
-  { key: 'Home', interval: 100, isRunning: false, taskId: '' },
-  { key: 'PageUp', interval: 100, isRunning: false, taskId: '' },
-  { key: 'Delete', interval: 100, isRunning: false, taskId: '' },
-  { key: 'End', interval: 100, isRunning: false, taskId: '' },
-  { key: 'PageDown', interval: 100, isRunning: false, taskId: '' }
+  { key: 'Insert', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
+  { key: 'Home', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
+  { key: 'PageUp', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
+  { key: 'Delete', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
+  { key: 'End', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
+  { key: 'PageDown', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 }
 ]);
 
 // 添加按鍵監聽相關
@@ -590,9 +685,6 @@ const confirmDeleteScript = (scriptName) => {
 }
 
 const deleteScript = async () => {
-  if (!confirm(`確定要刪除腳本 ${scriptToDelete.value} 嗎？`)) {
-    return
-  }
   try {
     const response = await axios.delete(`http://localhost:8080/api/keyboard/delete-script?name=${scriptToDelete.value}`)
     if (response.status === 200) {
@@ -617,30 +709,32 @@ const deleteScript = async () => {
   }
 }
 
-const saveCurrentScript = async () => {
-  try {
-    const scriptName = prompt('請輸入腳本名稱：')
-    if (!scriptName) {
-      return
-    }
+const saveCurrentScript = () => {
+  saveScriptName.value = ''
+  saveError.value = ''
+  saveDialogVisible.value = true
+}
 
-    const response = await axios.post(`http://localhost:8080/api/keyboard/save-script?name=${encodeURIComponent(scriptName)}`, recordedEvents.value)
+const confirmSave = async () => {
+  if (!saveScriptName.value.trim()) {
+    saveError.value = '腳本名稱不能為空'
+    return
+  }
+
+  try {
+    const response = await axios.post(`http://localhost:8080/api/keyboard/save-script?name=${encodeURIComponent(saveScriptName.value)}`, recordedEvents.value)
     if (response.status === 200) {
       snackbar.value = {
         show: true,
         text: '腳本儲存成功',
         color: 'success'
       }
+      saveDialogVisible.value = false
       await refreshScriptList()
     }
   } catch (error) {
     console.error('儲存腳本失敗:', error)
-    const errorMessage = error.response?.data || '儲存腳本失敗'
-    snackbar.value = {
-      show: true,
-      text: errorMessage,
-      color: 'error'
-    }
+    saveError.value = error.response?.data || '儲存腳本失敗'
   }
 }
 
@@ -806,6 +900,7 @@ const toggleScheduledKey = async (index) => {
       await axios.post(`http://localhost:8080/api/keyboard/scheduled-key/stop?taskId=task_${index}`);
       key.isRunning = false;
       key.taskId = '';
+      key.countdown = 0;
       snackbar.value = {
         show: true,
         text: '定時按鍵已停止',
@@ -839,6 +934,9 @@ const toggleScheduledKey = async (index) => {
       });
       key.isRunning = true;
       key.taskId = taskId;
+      key.lastPressTime = Date.now();
+      key.countdown = parseInt(key.interval);
+      startCountdown(index);
       snackbar.value = {
         show: true,
         text: '定時按鍵已啟動',
@@ -853,6 +951,31 @@ const toggleScheduledKey = async (index) => {
       };
     }
   }
+};
+
+const startCountdown = (index) => {
+  const key = scheduledKeys.value[index];
+  if (!key.isRunning) return;
+
+  const updateCountdown = () => {
+    if (!key.isRunning) return;
+    
+    const now = Date.now();
+    const elapsed = Math.floor((now - key.lastPressTime) / 1000);
+    const remaining = Math.max(0, parseInt(key.interval) - elapsed);
+    
+    key.countdown = remaining;
+    
+    if (remaining > 0) {
+      requestAnimationFrame(updateCountdown);
+    } else {
+      key.lastPressTime = now;
+      key.countdown = parseInt(key.interval);
+      requestAnimationFrame(updateCountdown);
+    }
+  };
+
+  updateCountdown();
 };
 
 const stopAllScheduledKeys = async () => {
@@ -1011,6 +1134,11 @@ onUnmounted(() => {
     clearInterval(statusCheckInterval)
   }
   stopAllScheduledKeys()
+  // 停止所有倒數計時
+  scheduledKeys.value.forEach(key => {
+    key.isRunning = false;
+    key.countdown = 0;
+  });
   window.removeEventListener('keydown', handleKeyDown);
   window.removeEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isPlaying.value) {
@@ -1193,5 +1321,82 @@ onUnmounted(() => {
 
 .gap-2 {
   gap: 8px;
+}
+
+/* 對話框相關樣式 */
+:deep(.v-dialog) {
+  border-radius: 12px !important;
+}
+
+:deep(.v-card) {
+  border-radius: 12px !important;
+}
+
+:deep(.v-card-title) {
+  font-size: 1.25rem !important;
+  line-height: 1.5 !important;
+}
+
+:deep(.v-card-text) {
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+:deep(.v-btn) {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+:deep(.v-text-field .v-field__input) {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+:deep(.v-text-field .v-field__outline) {
+  border-radius: 8px !important;
+}
+
+:deep(.v-dialog .v-card-actions) {
+  padding: 16px !important;
+}
+
+:deep(.v-dialog .v-btn) {
+  min-width: 100px !important;
+}
+
+/* 定時按鍵輸入框樣式 */
+:deep(.v-text-field .v-field__input) {
+  text-align: center !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+}
+
+:deep(.v-text-field .v-field__prefix),
+:deep(.v-text-field .v-field__suffix) {
+  font-size: 0.9rem !important;
+  color: rgba(var(--v-theme-on-surface), 0.6) !important;
+}
+
+:deep(.v-text-field .v-field__outline) {
+  border-width: 2px !important;
+}
+
+:deep(.v-text-field .v-field--disabled) {
+  opacity: 0.7 !important;
+}
+
+:deep(.v-text-field .v-field--focused .v-field__outline) {
+  border-width: 2px !important;
+}
+
+:deep(.v-text-field .v-field__hint) {
+  font-size: 0.75rem !important;
+  opacity: 0.7 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.v-text-field .v-field__hint.running) {
+  color: var(--v-theme-primary) !important;
+  font-weight: 500 !important;
 }
 </style> 
