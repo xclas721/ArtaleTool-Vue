@@ -1,22 +1,27 @@
 <template>
   <v-container>
     <!-- 控制面板 -->
-    <v-card v-if="!isPlaying" class="mb-4">
+    <v-card class="mb-4">
       <v-card-title class="text-h6">
         <v-icon start>mdi-cog</v-icon>
-        錄製面板
+        控制面板
       </v-card-title>
       <v-card-text>
-        <v-row>
-          <v-col cols="12" sm="9">
+        <!-- 錄製控制卡片 -->
+        <v-card variant="outlined" class="mb-4">
+          <v-card-text>
+            <div class="d-flex align-center mb-2">
+              <v-icon start color="teal">mdi-record</v-icon>
+              <span class="font-weight-bold">錄製控制</span>
+            </div>
             <v-btn-group>
               <v-btn
                 color="teal"
                 :disabled="isRecording"
                 @click="startRecording"
                 prepend-icon="mdi-record"
-                size="large"
-                class="text-h6 font-weight-bold"
+                size="small"
+                class="font-weight-bold"
               >
                 開始錄製
               </v-btn>
@@ -25,8 +30,8 @@
                 :disabled="!isRecording"
                 @click="stopRecording"
                 prepend-icon="mdi-stop"
-                size="large"
-                class="text-h6 font-weight-bold"
+                size="small"
+                class="font-weight-bold"
               >
                 停止錄製
               </v-btn>
@@ -35,223 +40,236 @@
                 :disabled="!recordedEvents.length"
                 @click="saveCurrentScript"
                 prepend-icon="mdi-content-save"
-                size="large"
-                class="text-h6 font-weight-bold"
+                size="small"
+                class="font-weight-bold"
               >
                 儲存腳本
               </v-btn>
             </v-btn-group>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
-    <!-- 定時按鍵面板 -->
-    <v-card v-if="!isPlaying" class="mb-4">
-      <v-card-title class="d-flex justify-space-between align-center">
-        <div class="d-flex align-center">
-          <v-icon start>mdi-clock-outline</v-icon>
-          <span class="text-h6">定時按鍵</span>
-        </div>
-        <v-btn
-          color="error"
-          @click="stopAllScheduledKeys"
-          prepend-icon="mdi-stop"
-          size="large"
-          class="text-h6 font-weight-bold"
-          :disabled="!scheduledKeys.some(key => key.isRunning)"
-        >
-          全結束
-        </v-btn>
-      </v-card-title>
-      <v-card-text>
-        <v-row>
-          <!-- 上排3個按鈕 -->
-          <v-col v-for="i in 3" :key="i" cols="12" sm="4">
-            <v-card variant="outlined" class="pa-2">
-              <v-card-text>
-                <div class="d-flex flex-column align-center">
+          </v-card-text>
+        </v-card>
+        
+        <!-- 播放控制和定時按鍵卡片 -->
+        <v-card variant="outlined" class="mb-4">
+          <v-card-text>
+            <v-row>
+                             <!-- 播放控制 -->
+               <v-col cols="4">
+                <div class="d-flex align-center mb-2">
+                  <v-icon start color="blue">mdi-play</v-icon>
+                  <span class="font-weight-bold">播放控制</span>
+                </div>
+                <v-switch
+                  v-model="isLooping"
+                  label="循環播放"
+                  :disabled="isPlaying"
+                  color="primary"
+                  hide-details
+                  class="mb-2"
+                  density="compact"
+                ></v-switch>
+                <v-text-field
+                  v-if="isLooping"
+                  v-model="loopCount"
+                  label="循環次數 (0=無限)"
+                  type="number"
+                  min="0"
+                  :disabled="isPlaying"
+                  hide-details
+                  class="mb-2"
+                  density="compact"
+                  variant="outlined"
+                ></v-text-field>
+                <v-btn-group>
                   <v-btn
-                    :color="activeKeyField === i-1 ? 'teal' : (scheduledKeys[i-1].key ? 'teal' : 'grey')"
-                    variant="outlined"
-                    :disabled="scheduledKeys[i-1].isRunning"
-                    class="mb-2 text-h6 font-weight-bold"
-                    style="min-width: 120px"
-                    @click="startKeyListening(i-1)"
+                    color="teal"
+                    :disabled="!loadedScript || isPlaying"
+                    @click="playScript"
+                    prepend-icon="mdi-play"
+                    size="small"
+                    class="font-weight-bold"
                   >
-                    <template v-if="activeKeyField === i-1">
-                      <v-icon class="me-2" color="teal">mdi-keyboard</v-icon>
-                      請按下按鍵
-                    </template>
-                    <template v-else>
-                      {{ scheduledKeys[i-1].key || '點擊輸入按鍵' }}
-                    </template>
+                    播放
                   </v-btn>
-                  <v-text-field
-                    v-model="scheduledKeys[i-1].interval"
-                    label="間隔(秒)"
-                    type="number"
-                    min="1"
-                    :disabled="scheduledKeys[i-1].isRunning"
-                    hide-details
-                    class="mb-2"
-                    style="max-width: 120px"
-                    variant="outlined"
-                    density="comfortable"
-                    bg-color="surface"
-                    color="primary"
-                    :suffix="'秒'"
-                    :prefix="'每'"
-                  ></v-text-field>
-                  <div v-if="scheduledKeys[i-1].isRunning" class="text-caption text-primary font-weight-medium mb-2">
-                    下次按鍵: {{ scheduledKeys[i-1].countdown }}秒
-                  </div>
-                  <div v-else class="text-caption text-medium-emphasis mb-2">
-                    最小 1 秒
+                  <v-btn
+                    color="error"
+                    :disabled="!isPlaying"
+                    @click="stopPlayback"
+                    prepend-icon="mdi-stop"
+                    size="small"
+                    class="font-weight-bold"
+                  >
+                    停止
+                  </v-btn>
+                </v-btn-group>
+              </v-col>
+              
+                             <!-- 定時按鍵控制 -->
+               <v-col cols="8">
+                <div class="d-flex align-center justify-space-between mb-2">
+                  <div class="d-flex align-center">
+                    <v-icon start color="orange">mdi-clock-outline</v-icon>
+                    <span class="font-weight-bold">定時按鍵</span>
                   </div>
                   <v-btn
-                    :color="scheduledKeys[i-1].isRunning ? 'error' : 'teal'"
-                    @click="toggleScheduledKey(i-1)"
-                    :prepend-icon="scheduledKeys[i-1].isRunning ? 'mdi-stop' : 'mdi-play'"
-                    class="text-h6 font-weight-bold"
-                    size="large"
-                    style="min-width: 120px"
+                    color="error"
+                    @click="stopAllScheduledKeys"
+                    prepend-icon="mdi-stop"
+                    size="x-small"
+                    class="font-weight-bold"
+                    :disabled="!scheduledKeys.some(key => key.isRunning)"
                   >
-                    {{ scheduledKeys[i-1].isRunning ? '停止' : '開始' }}
+                    全結束
                   </v-btn>
                 </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <!-- 下排3個按鈕 -->
-          <v-col v-for="i in 3" :key="i+3" cols="12" sm="4">
-            <v-card variant="outlined" class="pa-2">
-              <v-card-text>
-                <div class="d-flex flex-column align-center">
-                  <v-btn
-                    :color="activeKeyField === i+2 ? 'teal' : (scheduledKeys[i+2].key ? 'teal' : 'grey')"
-                    variant="outlined"
-                    :disabled="scheduledKeys[i+2].isRunning"
-                    class="mb-2 text-h6 font-weight-bold"
-                    style="min-width: 120px"
-                    @click="startKeyListening(i+2)"
-                  >
-                    <template v-if="activeKeyField === i+2">
-                      <v-icon class="me-2" color="teal">mdi-keyboard</v-icon>
-                      請按下按鍵
-                    </template>
-                    <template v-else>
-                      {{ scheduledKeys[i+2].key || '點擊輸入按鍵' }}
-                    </template>
-                  </v-btn>
-                  <v-text-field
-                    v-model="scheduledKeys[i+2].interval"
-                    label="間隔(秒)"
-                    type="number"
-                    min="1"
-                    :disabled="scheduledKeys[i+2].isRunning"
-                    hide-details
-                    class="mb-2"
-                    style="max-width: 120px"
-                    variant="outlined"
-                    density="comfortable"
-                    bg-color="surface"
-                    color="primary"
-                    :suffix="'秒'"
-                    :prefix="'每'"
-                  ></v-text-field>
-                  <div v-if="scheduledKeys[i+2].isRunning" class="text-caption text-primary font-weight-medium mb-2">
-                    下次按鍵: {{ scheduledKeys[i+2].countdown }}秒
-                  </div>
-                  <div v-else class="text-caption text-medium-emphasis mb-2">
-                    最小 1 秒
-                  </div>
-                  <v-btn
-                    :color="scheduledKeys[i+2].isRunning ? 'error' : 'teal'"
-                    @click="toggleScheduledKey(i+2)"
-                    :prepend-icon="scheduledKeys[i+2].isRunning ? 'mdi-stop' : 'mdi-play'"
-                    class="text-h6 font-weight-bold"
-                    size="large"
-                    style="min-width: 120px"
-                  >
-                    {{ scheduledKeys[i+2].isRunning ? '停止' : '開始' }}
-                  </v-btn>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
-    <v-card class="mb-4">
-      <v-card-title class="text-h6">
-        <v-icon start>mdi-cog</v-icon>
-        播放面板
-      </v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" sm="6">
-            <v-switch
-              v-model="isLooping"
-              label="循環播放"
-              :disabled="isPlaying"
-              color="primary"
-              hide-details
-              class="mb-2 text-h6"
-            ></v-switch>
-            <v-text-field
-              v-if="isLooping"
-              v-model="loopCount"
-              label="循環次數 (0=無限)"
-              type="number"
-              min="0"
-              :disabled="isPlaying"
-              hide-details
-              class="mb-2 text-h6"
-            ></v-text-field>
-            <v-btn-group>
-              <v-btn
-                color="teal"
-                :disabled="!loadedScript || isPlaying"
-                @click="playScript"
-                prepend-icon="mdi-play"
-                size="large"
-                class="text-h6 font-weight-bold"
-              >
-                播放腳本
-              </v-btn>
-              <v-btn
-                color="error"
-                :disabled="!isPlaying"
-                @click="stopPlayback"
-                prepend-icon="mdi-stop"
-                size="large"
-                class="text-h6 font-weight-bold"
-              >
-                停止播放
-              </v-btn>
-            </v-btn-group>
-          </v-col>
-          <v-col cols="12" sm="6" v-if="isPlaying">
+                <v-row>
+                  <v-col v-for="i in 3" :key="i" cols="4">
+                    <v-card variant="outlined" class="pa-1">
+                      <v-card-text class="pa-1">
+                        <div class="d-flex flex-column align-center">
+                          <v-btn
+                            :color="activeKeyField === i-1 ? 'teal' : (scheduledKeys[i-1].key ? 'teal' : 'grey')"
+                            variant="outlined"
+                            :disabled="scheduledKeys[i-1].isRunning"
+                            class="mb-1 font-weight-bold"
+                            style="min-width: 60px"
+                            size="x-small"
+                            @click="startKeyListening(i-1)"
+                          >
+                            <template v-if="activeKeyField === i-1">
+                              <v-icon class="me-1" color="teal" size="small">mdi-keyboard</v-icon>
+                              請按下按鍵
+                            </template>
+                            <template v-else>
+                              {{ scheduledKeys[i-1].key || '點擊輸入按鍵' }}
+                            </template>
+                          </v-btn>
+                          <v-text-field
+                            v-model="scheduledKeys[i-1].interval"
+                            min="1"
+                            :disabled="scheduledKeys[i-1].isRunning"
+                            hide-details
+                            class="mb-1"
+                            style="max-width: 90px; width: 100%"
+                            variant="outlined"
+                            density="compact"
+                            bg-color="surface"
+                            color="primary"
+                          ></v-text-field>
+                          <div v-if="scheduledKeys[i-1].isRunning" class="text-caption text-primary font-weight-medium mb-1">
+                            下次按鍵: {{ scheduledKeys[i-1].countdown }}秒
+                          </div>
+                          <div v-else class="text-caption text-medium-emphasis mb-1">
+                            最小 1 秒
+                          </div>
+                          <v-btn
+                            :color="scheduledKeys[i-1].isRunning ? 'error' : 'teal'"
+                            @click="toggleScheduledKey(i-1)"
+                            :prepend-icon="scheduledKeys[i-1].isRunning ? 'mdi-stop' : 'mdi-play'"
+                            class="font-weight-bold"
+                            size="x-small"
+                            style="min-width: 60px"
+                          >
+                            {{ scheduledKeys[i-1].isRunning ? '停止' : '開始' }}
+                          </v-btn>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col v-for="i in 3" :key="i+3" cols="4">
+                    <v-card variant="outlined" class="pa-1">
+                      <v-card-text class="pa-1">
+                        <div class="d-flex flex-column align-center">
+                          <v-btn
+                            :color="activeKeyField === i+2 ? 'teal' : (scheduledKeys[i+2].key ? 'teal' : 'grey')"
+                            variant="outlined"
+                            :disabled="scheduledKeys[i+2].isRunning"
+                            class="mb-1 font-weight-bold"
+                            style="min-width: 80px"
+                            size="x-small"
+                            @click="startKeyListening(i+2)"
+                          >
+                            <template v-if="activeKeyField === i+2">
+                              <v-icon class="me-1" color="teal" size="small">mdi-keyboard</v-icon>
+                              請按下按鍵
+                            </template>
+                            <template v-else>
+                              {{ scheduledKeys[i+2].key || '點擊輸入按鍵' }}
+                            </template>
+                          </v-btn>
+                                                <v-text-field
+                        v-model="scheduledKeys[i+2].interval"
+                        min="1"
+                        :disabled="scheduledKeys[i+2].isRunning"
+                        hide-details
+                        class="mb-1"
+                        style="max-width: 110px; width: 100%"
+                        variant="outlined"
+                        density="compact"
+                        bg-color="surface"
+                        color="primary"
+                      ></v-text-field>
+                          <div v-if="scheduledKeys[i+2].isRunning" class="text-caption text-primary font-weight-medium mb-1">
+                            下次按鍵: {{ scheduledKeys[i+2].countdown }}秒
+                          </div>
+                          <div v-else class="text-caption text-medium-emphasis mb-1">
+                            最小 1 秒
+                          </div>
+                          <v-btn
+                            :color="scheduledKeys[i+2].isRunning ? 'error' : 'teal'"
+                            @click="toggleScheduledKey(i+2)"
+                            :prepend-icon="scheduledKeys[i+2].isRunning ? 'mdi-stop' : 'mdi-play'"
+                            class="font-weight-bold"
+                            size="x-small"
+                            style="min-width: 60px"
+                          >
+                            {{ scheduledKeys[i+2].isRunning ? '停止' : '開始' }}
+                          </v-btn>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+        
+        <!-- 播放狀態顯示 -->
+        <v-row v-if="isPlaying">
+          <v-col cols="12">
             <v-alert
               color="info"
               variant="tonal"
-              class="mb-0 text-h6"
+              class="mb-0"
             >
               正在播放: {{ loadedScript?.name }}
               <template v-if="isLooping">
                 (第 {{ currentLoop }} 次 / {{ loopCount === 0 ? '無限' : loopCount }})
               </template>
-              <div class="text-body-2 mt-2">
-                <v-icon color="warning" class="me-1">mdi-keyboard-esc</v-icon>
+              <div class="text-caption mt-1">
+                <v-icon color="warning" class="me-1" size="small">mdi-keyboard-esc</v-icon>
                 按下 ESC 鍵可結束播放
               </div>
             </v-alert>
           </v-col>
         </v-row>
+        
+
       </v-card-text>
     </v-card>
+    
+    <!-- 視窗選擇器對話框 -->
+    <WindowSelector
+      v-model="windowSelectorVisible"
+      @window-selected="onWindowSelected"
+      @play-without-lock="playWithoutLock"
+    />
+    
+
+
     <!-- 腳本列表 -->
     <v-card v-if="!isPlaying" class="mb-4">
       <v-card-title class="d-flex justify-space-between align-center">
@@ -263,49 +281,49 @@
           color="primary"
           @click="refreshScriptList"
           prepend-icon="mdi-refresh"
-          size="large"
-          class="text-h6 font-weight-bold"
+          size="small"
+          class="font-weight-bold"
         >
           刷新列表
         </v-btn>
       </v-card-title>
       <v-card-text>
-        <v-table>
+        <v-table density="compact">
           <thead>
             <tr>
-              <th class="text-h6">腳本名稱</th>
-              <th class="text-right text-h6">操作</th>
+              <th class="text-caption">腳本名稱</th>
+              <th class="text-right text-caption">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="script in scriptList" :key="script.name">
-              <td class="text-h6">{{ script.name }}</td>
+              <td class="text-body-2">{{ script.name }}</td>
               <td class="text-right">
                 <v-btn-group>
                   <v-btn
                     color="primary"
-                    size="large"
+                    size="x-small"
                     @click="loadScript(script.name)"
                     prepend-icon="mdi-upload"
-                    class="text-h6 font-weight-bold"
+                    class="font-weight-bold"
                   >
                     載入
                   </v-btn>
                   <v-btn
                     color="info"
-                    size="large"
+                    size="x-small"
                     @click="renameScript(script.name)"
                     prepend-icon="mdi-pencil"
-                    class="text-h6 font-weight-bold"
+                    class="font-weight-bold"
                   >
-                    重命名
+                    改名
                   </v-btn>
                   <v-btn
                     color="error"
-                    size="large"
+                    size="x-small"
                     @click="confirmDeleteScript(script.name)"
                     prepend-icon="mdi-delete"
-                    class="text-h6 font-weight-bold"
+                    class="font-weight-bold"
                   >
                     刪除
                   </v-btn>
@@ -406,7 +424,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- 重命名對話框 -->
+    <!-- 改名對話框 -->
     <v-dialog
       v-model="renameDialogVisible"
       max-width="400"
@@ -415,7 +433,7 @@
       <v-card class="rounded-lg">
         <v-card-title class="text-h5 font-weight-bold pa-4 pb-2">
           <v-icon color="info" class="me-2">mdi-pencil</v-icon>
-          重命名腳本
+          改名腳本
         </v-card-title>
         <v-card-text class="pa-4 pt-2">
           <v-text-field
@@ -521,6 +539,8 @@
 import { ref, onUnmounted, onMounted, inject } from 'vue'
 import axios from 'axios'
 
+import WindowSelector from './WindowSelector.vue'
+
 const snackbar = inject('snackbar')
 const isRecording = ref(false)
 const recordedEvents = ref([])
@@ -544,6 +564,7 @@ const currentPressedKeys = ref([])
 const saveDialogVisible = ref(false)
 const saveScriptName = ref('')
 const saveError = ref('')
+const windowSelectorVisible = ref(false)
 let keyPollingInterval = null
 let countdownInterval = null
 let statusInterval = null
@@ -760,6 +781,22 @@ const playScript = async () => {
     return
   }
 
+  // 顯示視窗選擇器
+  windowSelectorVisible.value = true
+}
+
+// 視窗選擇後開始播放
+const onWindowSelected = async (window) => {
+  await startPlayback()
+}
+
+// 不鎖定視窗播放
+const playWithoutLock = async () => {
+  await startPlayback()
+}
+
+// 實際開始播放的函數
+const startPlayback = async () => {
   try {
     countdownVisible.value = true
     countdown.value = 3
@@ -1103,20 +1140,20 @@ const confirmRename = async () => {
     if (response.status === 200) {
       snackbar.value = {
         show: true,
-        text: '腳本重命名成功',
+                        text: '腳本改名成功',
         color: 'success'
       }
       renameDialogVisible.value = false
       await refreshScriptList()
       
-      // 如果當前載入的是被重命名的腳本，更新載入的腳本名稱
+              // 如果當前載入的是被改名的腳本，更新載入的腳本名稱
       if (loadedScript.value && loadedScript.value.name === scriptToRename.value) {
         loadedScript.value.name = newScriptName.value
       }
     }
   } catch (error) {
-    console.error('重命名腳本失敗:', error)
-    renameError.value = error.response?.data || '重命名腳本失敗'
+            console.error('改名腳本失敗:', error)
+        renameError.value = error.response?.data || '改名腳本失敗'
   }
 }
 
@@ -1168,7 +1205,7 @@ onUnmounted(() => {
 
 .v-btn-group {
   display: inline-flex;
-  gap: 4px;
+  gap: 1px;
 }
 
 .v-timeline-item {
