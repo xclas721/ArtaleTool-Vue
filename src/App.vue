@@ -1,48 +1,14 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container fluid>
-        <WindowManager />
-        <ControlPanel />
-      </v-container>
-    </v-main>
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="3000"
-      location="top"
-    >
-      {{ snackbar.text }}
-      <template v-slot:actions>
-        <v-btn
-          color="white"
-          variant="text"
-          @click="snackbar.show = false"
-        >
-          關閉
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </v-app>
+  <router-view />
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
-import ControlPanel from './components/ControlPanel.vue'
-import WindowManager from './components/WindowManager.vue'
-
-const snackbar = ref({
-  show: false,
-  text: '',
-  color: 'success'
-})
-
-provide('snackbar', snackbar)
+// 空的 script setup，因為路由會處理所有頁面
 </script>
 
 <style>
 .v-application {
-  font-family: 'Microsoft JhengHei', sans-serif !important;
+  font-family: "Microsoft JhengHei", sans-serif !important;
   font-size: 0.875rem !important;
 }
 
@@ -56,12 +22,24 @@ provide('snackbar', snackbar)
 }
 
 /* 標題字體調整 */
-.text-h1 { font-size: 1.5rem !important; }
-.text-h2 { font-size: 1.25rem !important; }
-.text-h3 { font-size: 1.125rem !important; }
-.text-h4 { font-size: 1rem !important; }
-.text-h5 { font-size: 0.875rem !important; }
-.text-h6 { font-size: 0.8rem !important; }
+.text-h1 {
+  font-size: 1.5rem !important;
+}
+.text-h2 {
+  font-size: 1.25rem !important;
+}
+.text-h3 {
+  font-size: 1.125rem !important;
+}
+.text-h4 {
+  font-size: 1rem !important;
+}
+.text-h5 {
+  font-size: 0.875rem !important;
+}
+.text-h6 {
+  font-size: 0.8rem !important;
+}
 
 /* 按鈕大小調整 */
 .v-btn {

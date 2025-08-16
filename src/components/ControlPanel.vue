@@ -48,13 +48,13 @@
             </v-btn-group>
           </v-card-text>
         </v-card>
-        
+
         <!-- 播放控制和定時按鍵卡片 -->
         <v-card variant="outlined" class="mb-4">
           <v-card-text>
             <v-row>
-                             <!-- 播放控制 -->
-               <v-col cols="4">
+              <!-- 播放控制 -->
+              <v-col cols="4">
                 <div class="d-flex align-center mb-2">
                   <v-icon start color="blue">mdi-play</v-icon>
                   <span class="font-weight-bold">播放控制</span>
@@ -103,9 +103,9 @@
                   </v-btn>
                 </v-btn-group>
               </v-col>
-              
-                             <!-- 定時按鍵控制 -->
-               <v-col cols="8">
+
+              <!-- 定時按鍵控制 -->
+              <v-col cols="8">
                 <div class="d-flex align-center justify-space-between mb-2">
                   <div class="d-flex align-center">
                     <v-icon start color="orange">mdi-clock-outline</v-icon>
@@ -117,7 +117,7 @@
                     prepend-icon="mdi-stop"
                     size="x-small"
                     class="font-weight-bold"
-                    :disabled="!scheduledKeys.some(key => key.isRunning)"
+                    :disabled="!scheduledKeys.some((key) => key.isRunning)"
                   >
                     全結束
                   </v-btn>
@@ -128,26 +128,34 @@
                       <v-card-text class="pa-1">
                         <div class="d-flex flex-column align-center">
                           <v-btn
-                            :color="activeKeyField === i-1 ? 'teal' : (scheduledKeys[i-1].key ? 'teal' : 'grey')"
+                            :color="
+                              activeKeyField === i - 1
+                                ? 'teal'
+                                : scheduledKeys[i - 1].key
+                                  ? 'teal'
+                                  : 'grey'
+                            "
                             variant="outlined"
-                            :disabled="scheduledKeys[i-1].isRunning"
+                            :disabled="scheduledKeys[i - 1].isRunning"
                             class="mb-1 font-weight-bold"
                             style="min-width: 60px"
                             size="x-small"
-                            @click="startKeyListening(i-1)"
+                            @click="startKeyListening(i - 1)"
                           >
-                            <template v-if="activeKeyField === i-1">
-                              <v-icon class="me-1" color="teal" size="small">mdi-keyboard</v-icon>
+                            <template v-if="activeKeyField === i - 1">
+                              <v-icon class="me-1" color="teal" size="small"
+                                >mdi-keyboard</v-icon
+                              >
                               請按下按鍵
                             </template>
                             <template v-else>
-                              {{ scheduledKeys[i-1].key || '點擊輸入按鍵' }}
+                              {{ scheduledKeys[i - 1].key || "點擊輸入按鍵" }}
                             </template>
                           </v-btn>
                           <v-text-field
-                            v-model="scheduledKeys[i-1].interval"
+                            v-model="scheduledKeys[i - 1].interval"
                             min="1"
-                            :disabled="scheduledKeys[i-1].isRunning"
+                            :disabled="scheduledKeys[i - 1].isRunning"
                             hide-details
                             class="mb-1"
                             style="max-width: 90px; width: 100%"
@@ -156,21 +164,35 @@
                             bg-color="surface"
                             color="primary"
                           ></v-text-field>
-                          <div v-if="scheduledKeys[i-1].isRunning" class="text-caption text-primary font-weight-medium mb-1">
-                            下次按鍵: {{ scheduledKeys[i-1].countdown }}秒
+                          <div
+                            v-if="scheduledKeys[i - 1].isRunning"
+                            class="text-caption text-primary font-weight-medium mb-1"
+                          >
+                            下次按鍵: {{ scheduledKeys[i - 1].countdown }}秒
                           </div>
-                          <div v-else class="text-caption text-medium-emphasis mb-1">
+                          <div
+                            v-else
+                            class="text-caption text-medium-emphasis mb-1"
+                          >
                             最小 1 秒
                           </div>
                           <v-btn
-                            :color="scheduledKeys[i-1].isRunning ? 'error' : 'teal'"
-                            @click="toggleScheduledKey(i-1)"
-                            :prepend-icon="scheduledKeys[i-1].isRunning ? 'mdi-stop' : 'mdi-play'"
+                            :color="
+                              scheduledKeys[i - 1].isRunning ? 'error' : 'teal'
+                            "
+                            @click="toggleScheduledKey(i - 1)"
+                            :prepend-icon="
+                              scheduledKeys[i - 1].isRunning
+                                ? 'mdi-stop'
+                                : 'mdi-play'
+                            "
                             class="font-weight-bold"
                             size="x-small"
                             style="min-width: 60px"
                           >
-                            {{ scheduledKeys[i-1].isRunning ? '停止' : '開始' }}
+                            {{
+                              scheduledKeys[i - 1].isRunning ? "停止" : "開始"
+                            }}
                           </v-btn>
                         </div>
                       </v-card-text>
@@ -178,54 +200,76 @@
                   </v-col>
                 </v-row>
                 <v-row>
-                  <v-col v-for="i in 3" :key="i+3" cols="4">
+                  <v-col v-for="i in 3" :key="i + 3" cols="4">
                     <v-card variant="outlined" class="pa-1">
                       <v-card-text class="pa-1">
                         <div class="d-flex flex-column align-center">
                           <v-btn
-                            :color="activeKeyField === i+2 ? 'teal' : (scheduledKeys[i+2].key ? 'teal' : 'grey')"
+                            :color="
+                              activeKeyField === i + 2
+                                ? 'teal'
+                                : scheduledKeys[i + 2].key
+                                  ? 'teal'
+                                  : 'grey'
+                            "
                             variant="outlined"
-                            :disabled="scheduledKeys[i+2].isRunning"
+                            :disabled="scheduledKeys[i + 2].isRunning"
                             class="mb-1 font-weight-bold"
-                            style="min-width: 80px"
+                            style="min-width: 60px"
                             size="x-small"
-                            @click="startKeyListening(i+2)"
+                            @click="startKeyListening(i + 2)"
                           >
-                            <template v-if="activeKeyField === i+2">
-                              <v-icon class="me-1" color="teal" size="small">mdi-keyboard</v-icon>
+                            <template v-if="activeKeyField === i + 2">
+                              <v-icon class="me-1" color="teal" size="small"
+                                >mdi-keyboard</v-icon
+                              >
                               請按下按鍵
                             </template>
                             <template v-else>
-                              {{ scheduledKeys[i+2].key || '點擊輸入按鍵' }}
+                              {{ scheduledKeys[i + 2].key || "點擊輸入按鍵" }}
                             </template>
                           </v-btn>
-                                                <v-text-field
-                        v-model="scheduledKeys[i+2].interval"
-                        min="1"
-                        :disabled="scheduledKeys[i+2].isRunning"
-                        hide-details
-                        class="mb-1"
-                        style="max-width: 110px; width: 100%"
-                        variant="outlined"
-                        density="compact"
-                        bg-color="surface"
-                        color="primary"
-                      ></v-text-field>
-                          <div v-if="scheduledKeys[i+2].isRunning" class="text-caption text-primary font-weight-medium mb-1">
-                            下次按鍵: {{ scheduledKeys[i+2].countdown }}秒
+                          <v-text-field
+                            v-model="scheduledKeys[i + 2].interval"
+                            min="1"
+                            :disabled="scheduledKeys[i + 2].isRunning"
+                            hide-details
+                            class="mb-1"
+                            style="max-width: 90px; width: 100%"
+                            variant="outlined"
+                            density="compact"
+                            bg-color="surface"
+                            color="primary"
+                          ></v-text-field>
+                          <div
+                            v-if="scheduledKeys[i + 2].isRunning"
+                            class="text-caption text-primary font-weight-medium mb-1"
+                          >
+                            下次按鍵: {{ scheduledKeys[i + 2].countdown }}秒
                           </div>
-                          <div v-else class="text-caption text-medium-emphasis mb-1">
+                          <div
+                            v-else
+                            class="text-caption text-medium-emphasis mb-1"
+                          >
                             最小 1 秒
                           </div>
                           <v-btn
-                            :color="scheduledKeys[i+2].isRunning ? 'error' : 'teal'"
-                            @click="toggleScheduledKey(i+2)"
-                            :prepend-icon="scheduledKeys[i+2].isRunning ? 'mdi-stop' : 'mdi-play'"
+                            :color="
+                              scheduledKeys[i + 2].isRunning ? 'error' : 'teal'
+                            "
+                            @click="toggleScheduledKey(i + 2)"
+                            :prepend-icon="
+                              scheduledKeys[i + 2].isRunning
+                                ? 'mdi-stop'
+                                : 'mdi-play'
+                            "
                             class="font-weight-bold"
                             size="x-small"
                             style="min-width: 60px"
                           >
-                            {{ scheduledKeys[i+2].isRunning ? '停止' : '開始' }}
+                            {{
+                              scheduledKeys[i + 2].isRunning ? "停止" : "開始"
+                            }}
                           </v-btn>
                         </div>
                       </v-card-text>
@@ -236,103 +280,124 @@
             </v-row>
           </v-card-text>
         </v-card>
-        
+
         <!-- 播放狀態顯示 -->
         <v-row v-if="isPlaying">
           <v-col cols="12">
-            <v-alert
-              color="info"
-              variant="tonal"
-              class="mb-0"
-            >
+            <v-alert color="info" variant="tonal" class="mb-0">
               正在播放: {{ loadedScript?.name }}
               <template v-if="isLooping">
-                (第 {{ currentLoop }} 次 / {{ loopCount === 0 ? '無限' : loopCount }})
+                (第 {{ currentLoop }} 次 /
+                {{ loopCount === 0 ? "無限" : loopCount }})
               </template>
               <div class="text-caption mt-1">
-                <v-icon color="warning" class="me-1" size="small">mdi-keyboard-esc</v-icon>
+                <v-icon color="warning" class="me-1" size="small"
+                  >mdi-keyboard-esc</v-icon
+                >
                 按下 ESC 鍵可結束播放
               </div>
             </v-alert>
           </v-col>
         </v-row>
-        
-
       </v-card-text>
     </v-card>
-    
+
     <!-- 視窗選擇器對話框 -->
     <WindowSelector
       v-model="windowSelectorVisible"
       @window-selected="onWindowSelected"
       @play-without-lock="playWithoutLock"
     />
-    
-
 
     <!-- 腳本列表 -->
     <v-card v-if="!isPlaying" class="mb-4">
-      <v-card-title class="d-flex justify-space-between align-center">
+      <v-card-title
+        class="d-flex justify-space-between align-center cursor-pointer"
+        @click="toggleScriptList"
+      >
         <div class="d-flex align-center">
           <v-icon start>mdi-format-list-bulleted</v-icon>
           <span class="text-h6">腳本列表</span>
+          <v-chip color="primary" size="small" class="ml-2" variant="tonal">
+            {{ scriptList.length }}
+          </v-chip>
         </div>
-        <v-btn
-          color="primary"
-          @click="refreshScriptList"
-          prepend-icon="mdi-refresh"
-          size="small"
-          class="font-weight-bold"
-        >
-          刷新列表
-        </v-btn>
+        <div class="d-flex align-center">
+          <v-btn
+            color="primary"
+            @click.stop="refreshScriptList"
+            prepend-icon="mdi-refresh"
+            size="small"
+            class="font-weight-bold me-2"
+          >
+            刷新列表
+          </v-btn>
+          <v-icon
+            :icon="scriptListExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            size="small"
+            class="transition-transform"
+          ></v-icon>
+        </div>
       </v-card-title>
-      <v-card-text>
-        <v-table density="compact">
-          <thead>
-            <tr>
-              <th class="text-caption">腳本名稱</th>
-              <th class="text-right text-caption">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="script in scriptList" :key="script.name">
-              <td class="text-body-2">{{ script.name }}</td>
-              <td class="text-right">
-                <v-btn-group>
-                  <v-btn
-                    color="primary"
-                    size="x-small"
-                    @click="loadScript(script.name)"
-                    prepend-icon="mdi-upload"
-                    class="font-weight-bold"
-                  >
-                    載入
-                  </v-btn>
-                  <v-btn
-                    color="info"
-                    size="x-small"
-                    @click="renameScript(script.name)"
-                    prepend-icon="mdi-pencil"
-                    class="font-weight-bold"
-                  >
-                    改名
-                  </v-btn>
-                  <v-btn
-                    color="error"
-                    size="x-small"
-                    @click="confirmDeleteScript(script.name)"
-                    prepend-icon="mdi-delete"
-                    class="font-weight-bold"
-                  >
-                    刪除
-                  </v-btn>
-                </v-btn-group>
-              </td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-card-text>
+
+      <v-expand-transition>
+        <v-card-text v-show="scriptListExpanded">
+          <div v-if="scriptList.length === 0" class="text-center py-8">
+            <v-icon size="large" color="grey" class="mb-2"
+              >mdi-file-document-outline</v-icon
+            >
+            <div class="text-body-1 text-grey">暫無腳本</div>
+            <div class="text-caption text-grey">
+              錄製並儲存腳本後將顯示在此處
+            </div>
+          </div>
+
+          <v-table v-else density="compact">
+            <thead>
+              <tr>
+                <th class="text-caption">腳本名稱</th>
+                <th class="text-right text-caption">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="script in scriptList" :key="script.name">
+                <td class="text-body-2">{{ script.name }}</td>
+                <td class="text-right">
+                  <v-btn-group>
+                    <v-btn
+                      color="primary"
+                      size="x-small"
+                      @click="loadScript(script.name)"
+                      prepend-icon="mdi-upload"
+                      class="font-weight-bold"
+                    >
+                      載入
+                    </v-btn>
+                    <v-btn
+                      color="info"
+                      size="x-small"
+                      @click="renameScript(script.name)"
+                      prepend-icon="mdi-pencil"
+                      class="font-weight-bold"
+                    >
+                      改名
+                    </v-btn>
+                    <v-btn
+                      color="error"
+                      size="x-small"
+                      @click="confirmDeleteScript(script.name)"
+                      prepend-icon="mdi-delete"
+                      class="font-weight-bold"
+                    >
+                      刪除
+                    </v-btn>
+                  </v-btn-group>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-card-text>
+      </v-expand-transition>
     </v-card>
 
     <!-- 腳本內容 -->
@@ -346,16 +411,23 @@
         <div v-if="isPlaying" class="current-key-display mb-4">
           <div class="text-h6 mb-2">當前播放按鍵</div>
           <div class="d-flex flex-wrap gap-2">
-            <div 
-              v-for="(key, index) in currentPressedKeys" 
+            <div
+              v-for="(key, index) in currentPressedKeys"
               :key="index"
               class="key-preview"
               :class="{ 'key-pressed': true }"
             >
-              <v-icon :icon="getKeyIcon(key)" size="24" class="key-icon"></v-icon>
+              <v-icon
+                :icon="getKeyIcon(key)"
+                size="24"
+                class="key-icon"
+              ></v-icon>
               <span class="key-text">{{ key }}</span>
             </div>
-            <div v-if="currentPressedKeys.length === 0" class="text-body-1 text-grey">
+            <div
+              v-if="currentPressedKeys.length === 0"
+              class="text-body-1 text-grey"
+            >
               等待中...
             </div>
           </div>
@@ -370,14 +442,29 @@
           >
             <div class="d-flex align-center">
               <span class="text-body-2 me-4">
-                {{ formatRelativeTime(event.timestamp, loadedScript[0].timestamp) }}
+                {{
+                  formatRelativeTime(event.timestamp, loadedScript[0].timestamp)
+                }}
               </span>
-              <div class="key-preview me-4" :class="{ 'key-pressed': event.action === 'PRESS' }">
-                <v-icon :icon="getKeyIcon(event.key)" size="24" class="key-icon"></v-icon>
+              <div
+                class="key-preview me-4"
+                :class="{ 'key-pressed': event.action === 'PRESS' }"
+              >
+                <v-icon
+                  :icon="getKeyIcon(event.key)"
+                  size="24"
+                  class="key-icon"
+                ></v-icon>
                 <span class="key-text">{{ event.key }}</span>
               </div>
-              <div class="action-badge" :class="{ 'press': event.action === 'PRESS', 'release': event.action === 'RELEASE' }">
-                {{ event.action === 'PRESS' ? 'DOWN' : 'UP' }}
+              <div
+                class="action-badge"
+                :class="{
+                  press: event.action === 'PRESS',
+                  release: event.action === 'RELEASE',
+                }"
+              >
+                {{ event.action === "PRESS" ? "DOWN" : "UP" }}
               </div>
             </div>
           </v-timeline-item>
@@ -526,9 +613,7 @@
           <div class="text-h1 font-weight-bold text-primary">
             {{ countdown }}
           </div>
-          <div class="text-body-1 text-medium-emphasis mt-2">
-            準備開始播放
-          </div>
+          <div class="text-body-1 text-medium-emphasis mt-2">準備開始播放</div>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -536,78 +621,125 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, onMounted, inject } from 'vue'
-import axios from 'axios'
+import { ref, onUnmounted, onMounted, inject } from "vue";
+import axios from "axios";
 
-import WindowSelector from './WindowSelector.vue'
+import WindowSelector from "./WindowSelector.vue";
 
-const snackbar = inject('snackbar')
-const isRecording = ref(false)
-const recordedEvents = ref([])
-const scriptList = ref([])
-const loadedScript = ref(null)
-const isPlaying = ref(false)
-const countdownVisible = ref(false)
-const countdown = ref(3)
-const deleteDialogVisible = ref(false)
-const scriptToDelete = ref('')
-const isLooping = ref(true)
-const loopCount = ref(0)
-const currentLoop = ref(0)
-const renameDialogVisible = ref(false)
-const newScriptName = ref('')
-const renameError = ref('')
-const scriptToRename = ref('')
-const currentPlayingKey = ref(null)
-const currentPlayingIndex = ref(-1)
-const currentPressedKeys = ref([])
-const saveDialogVisible = ref(false)
-const saveScriptName = ref('')
-const saveError = ref('')
-const windowSelectorVisible = ref(false)
-let keyPollingInterval = null
-let countdownInterval = null
-let statusInterval = null
-let statusCheckInterval = null
+const snackbar = inject("snackbar");
+const isRecording = ref(false);
+const recordedEvents = ref([]);
+const scriptList = ref([]);
+const loadedScript = ref(null);
+const isPlaying = ref(false);
+const countdownVisible = ref(false);
+const countdown = ref(3);
+const deleteDialogVisible = ref(false);
+const scriptToDelete = ref("");
+const isLooping = ref(true);
+const loopCount = ref(0);
+const currentLoop = ref(0);
+const renameDialogVisible = ref(false);
+const newScriptName = ref("");
+const renameError = ref("");
+const scriptToRename = ref("");
+const currentPlayingKey = ref(null);
+const currentPlayingIndex = ref(-1);
+const currentPressedKeys = ref([]);
+const saveDialogVisible = ref(false);
+const saveScriptName = ref("");
+const saveError = ref("");
+const windowSelectorVisible = ref(false);
+const scriptListExpanded = ref(false);
+let keyPollingInterval = null;
+let countdownInterval = null;
+let statusInterval = null;
+let statusCheckInterval = null;
 
 // 定時按鍵相關
 const scheduledKeys = ref([
-  { key: 'Insert', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
-  { key: 'Home', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
-  { key: 'PageUp', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
-  { key: 'Delete', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
-  { key: 'End', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 },
-  { key: 'PageDown', interval: 100, isRunning: false, taskId: '', lastPressTime: 0, countdown: 0 }
+  {
+    key: "Insert",
+    interval: 590,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
+  {
+    key: "Home",
+    interval: 580,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
+  {
+    key: "PageUp",
+    interval: 1750,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
+  {
+    key: "Delete",
+    interval: 10,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
+  {
+    key: "End",
+    interval: 999,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
+  {
+    key: "PageDown",
+    interval: 999,
+    isRunning: false,
+    taskId: "",
+    lastPressTime: 0,
+    countdown: 0,
+  },
 ]);
 
 // 添加按鍵監聽相關
 const activeKeyField = ref(null);
 
+const toggleScriptList = () => {
+  scriptListExpanded.value = !scriptListExpanded.value;
+};
+
 const handleKeyDown = (event, index) => {
   event.preventDefault();
   let key = event.key;
-  
+
   // 特殊按鍵處理
   const keyMap = {
-    'Insert': 'Insert',
-    'Shift': 'Shift',
-    'Control': 'Ctrl',
-    'Alt': 'Alt',
-    'Meta': 'Command',
-    ' ': 'Space',
-    'Enter': 'Enter',
-    'Escape': 'Escape',
-    'Tab': 'Tab',
-    'Backspace': 'Backspace',
-    'Delete': 'Delete',
-    'Home': 'Home',
-    'End': 'End',
-    'PageUp': 'PageUp',
-    'PageDown': 'PageDown',
-    'ArrowLeft': 'Left',
-    'ArrowRight': 'Right',
-    'ArrowUp': 'Up',
-    'ArrowDown': 'Down'
+    Insert: "Insert",
+    Shift: "Shift",
+    Control: "Ctrl",
+    Alt: "Alt",
+    Meta: "Command",
+    " ": "Space",
+    Enter: "Enter",
+    Escape: "Escape",
+    Tab: "Tab",
+    Backspace: "Backspace",
+    Delete: "Delete",
+    Home: "Home",
+    End: "End",
+    PageUp: "PageUp",
+    PageDown: "PageDown",
+    ArrowLeft: "Left",
+    ArrowRight: "Right",
+    ArrowUp: "Up",
+    ArrowDown: "Down",
   };
 
   // 如果是特殊按鍵，使用映射
@@ -617,7 +749,7 @@ const handleKeyDown = (event, index) => {
     // 如果是字母或數字，轉換為大寫
     key = key.toUpperCase();
   }
-  
+
   scheduledKeys.value[index].key = key;
   activeKeyField.value = null;
 };
@@ -628,359 +760,397 @@ const startKeyListening = (index) => {
 
 const startRecording = async () => {
   try {
-    const response = await axios.post('http://localhost:8080/api/keyboard/start-recording')
+    const response = await axios.post(
+      "http://localhost:8080/api/keyboard/start-recording",
+    );
     if (response.status === 200) {
-      isRecording.value = true
-      recordedEvents.value = []
+      isRecording.value = true;
+      recordedEvents.value = [];
       snackbar.value = {
         show: true,
-        text: '開始錄製',
-        color: 'success'
-      }
+        text: "開始錄製",
+        color: "success",
+      };
     }
   } catch (error) {
-    console.error('開始錄製失敗:', error)
-    const errorMessage = error.response?.data || '開始錄製失敗，請確保應用程序有足夠的權限'
+    console.error("開始錄製失敗:", error);
+    const errorMessage =
+      error.response?.data || "開始錄製失敗，請確保應用程序有足夠的權限";
     snackbar.value = {
       show: true,
       text: errorMessage,
-      color: 'error'
-    }
+      color: "error",
+    };
   }
-}
+};
 
 const stopRecording = async () => {
   try {
-    const response = await axios.post('http://localhost:8080/api/keyboard/stop-recording')
+    const response = await axios.post(
+      "http://localhost:8080/api/keyboard/stop-recording",
+    );
     if (response.status === 200) {
-      isRecording.value = false
-      recordedEvents.value = response.data
+      isRecording.value = false;
+      recordedEvents.value = response.data;
       snackbar.value = {
         show: true,
         text: `停止錄製，共錄製 ${recordedEvents.value.length} 個事件`,
-        color: 'success'
-      }
+        color: "success",
+      };
     }
   } catch (error) {
-    console.error('停止錄製失敗:', error)
-    const errorMessage = error.response?.data || '停止錄製失敗'
+    console.error("停止錄製失敗:", error);
+    const errorMessage = error.response?.data || "停止錄製失敗";
     snackbar.value = {
       show: true,
       text: errorMessage,
-      color: 'error'
-    }
+      color: "error",
+    };
   }
-}
+};
 
 const refreshScriptList = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/keyboard/list-scripts')
-    scriptList.value = response.data.map(name => ({ name }))
+    const response = await axios.get(
+      "http://localhost:8080/api/keyboard/list-scripts",
+    );
+    scriptList.value = response.data.map((name) => ({ name }));
     snackbar.value = {
       show: true,
-      text: '腳本列表已更新',
-      color: 'success'
-    }
+      text: "腳本列表已更新",
+      color: "success",
+    };
   } catch (error) {
-    console.error('載入腳本列表失敗:', error)
+    console.error("載入腳本列表失敗:", error);
     snackbar.value = {
       show: true,
-      text: '載入腳本列表失敗',
-      color: 'error'
-    }
+      text: "載入腳本列表失敗",
+      color: "error",
+    };
   }
-}
+};
 
 const loadScript = async (scriptName) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/keyboard/load-script?name=${scriptName}`)
+    const response = await axios.get(
+      `http://localhost:8080/api/keyboard/load-script?name=${scriptName}`,
+    );
     if (response.status === 200) {
-      loadedScript.value = response.data
+      loadedScript.value = response.data;
+      // 載入完成後自動折疊腳本列表
+      scriptListExpanded.value = false;
       snackbar.value = {
         show: true,
         text: `已載入腳本: ${scriptName}`,
-        color: 'success'
-      }
+        color: "success",
+      };
     }
   } catch (error) {
-    console.error('載入腳本失敗:', error)
+    console.error("載入腳本失敗:", error);
     snackbar.value = {
       show: true,
-      text: '載入腳本失敗',
-      color: 'error'
-    }
+      text: "載入腳本失敗",
+      color: "error",
+    };
   }
-}
+};
 
 const confirmDeleteScript = (scriptName) => {
-  scriptToDelete.value = scriptName
-  deleteDialogVisible.value = true
-}
+  scriptToDelete.value = scriptName;
+  deleteDialogVisible.value = true;
+};
 
 const deleteScript = async () => {
   try {
-    const response = await axios.delete(`http://localhost:8080/api/keyboard/delete-script?name=${scriptToDelete.value}`)
+    const response = await axios.delete(
+      `http://localhost:8080/api/keyboard/delete-script?name=${scriptToDelete.value}`,
+    );
     if (response.status === 200) {
       snackbar.value = {
         show: true,
-        text: '腳本刪除成功',
-        color: 'success'
-      }
-      deleteDialogVisible.value = false
-      refreshScriptList()
-      if (loadedScript.value && loadedScript.value.name === scriptToDelete.value) {
-        loadedScript.value = null
+        text: "腳本刪除成功",
+        color: "success",
+      };
+      deleteDialogVisible.value = false;
+      refreshScriptList();
+      if (
+        loadedScript.value &&
+        loadedScript.value.name === scriptToDelete.value
+      ) {
+        loadedScript.value = null;
       }
     }
   } catch (error) {
-    console.error('刪除腳本失敗:', error)
+    console.error("刪除腳本失敗:", error);
     snackbar.value = {
       show: true,
-      text: '刪除腳本失敗',
-      color: 'error'
-    }
+      text: "刪除腳本失敗",
+      color: "error",
+    };
   }
-}
+};
 
 const saveCurrentScript = () => {
-  saveScriptName.value = ''
-  saveError.value = ''
-  saveDialogVisible.value = true
-}
+  saveScriptName.value = "";
+  saveError.value = "";
+  saveDialogVisible.value = true;
+};
 
 const confirmSave = async () => {
   if (!saveScriptName.value.trim()) {
-    saveError.value = '腳本名稱不能為空'
-    return
+    saveError.value = "腳本名稱不能為空";
+    return;
   }
 
   try {
-    const response = await axios.post(`http://localhost:8080/api/keyboard/save-script?name=${encodeURIComponent(saveScriptName.value)}`, recordedEvents.value)
+    const response = await axios.post(
+      `http://localhost:8080/api/keyboard/save-script?name=${encodeURIComponent(saveScriptName.value)}`,
+      recordedEvents.value,
+    );
     if (response.status === 200) {
       snackbar.value = {
         show: true,
-        text: '腳本儲存成功',
-        color: 'success'
-      }
-      saveDialogVisible.value = false
-      await refreshScriptList()
+        text: "腳本儲存成功",
+        color: "success",
+      };
+      saveDialogVisible.value = false;
+      await refreshScriptList();
     }
   } catch (error) {
-    console.error('儲存腳本失敗:', error)
-    saveError.value = error.response?.data || '儲存腳本失敗'
+    console.error("儲存腳本失敗:", error);
+    saveError.value = error.response?.data || "儲存腳本失敗";
   }
-}
+};
 
 const playScript = async () => {
   if (!loadedScript.value) {
     snackbar.value = {
       show: true,
-      text: '請先載入要播放的腳本',
-      color: 'error'
-    }
-    return
+      text: "請先載入要播放的腳本",
+      color: "error",
+    };
+    return;
   }
 
   // 顯示視窗選擇器
-  windowSelectorVisible.value = true
-}
+  windowSelectorVisible.value = true;
+};
 
 // 視窗選擇後開始播放
 const onWindowSelected = async (window) => {
-  await startPlayback()
-}
+  await startPlayback();
+};
 
 // 不鎖定視窗播放
 const playWithoutLock = async () => {
-  await startPlayback()
-}
+  await startPlayback();
+};
 
 // 實際開始播放的函數
 const startPlayback = async () => {
   try {
-    countdownVisible.value = true
-    countdown.value = 3
+    countdownVisible.value = true;
+    countdown.value = 3;
 
     countdownInterval = setInterval(() => {
-      countdown.value--
+      countdown.value--;
       if (countdown.value <= 0) {
-        clearInterval(countdownInterval)
-        countdownVisible.value = false
+        clearInterval(countdownInterval);
+        countdownVisible.value = false;
       }
-    }, 1000)
+    }, 1000);
 
-    const response = await axios.post('http://localhost:8080/api/keyboard/play-script', loadedScript.value, {
-      params: {
-        loop: isLooping.value,
-        count: loopCount.value
-      }
-    })
+    const response = await axios.post(
+      "http://localhost:8080/api/keyboard/play-script",
+      loadedScript.value,
+      {
+        params: {
+          loop: isLooping.value,
+          count: loopCount.value,
+        },
+      },
+    );
 
     if (response.status === 200) {
-      isPlaying.value = true
-      startStatusCheck()
+      isPlaying.value = true;
+      startStatusCheck();
       snackbar.value = {
         show: true,
-        text: '開始播放腳本',
-        color: 'success'
-      }
+        text: "開始播放腳本",
+        color: "success",
+      };
     }
   } catch (error) {
-    console.error('播放腳本失敗:', error)
+    console.error("播放腳本失敗:", error);
     snackbar.value = {
       show: true,
-      text: '播放腳本失敗',
-      color: 'error'
-    }
-    isPlaying.value = false
-    countdownVisible.value = false
+      text: "播放腳本失敗",
+      color: "error",
+    };
+    isPlaying.value = false;
+    countdownVisible.value = false;
     if (countdownInterval) {
-      clearInterval(countdownInterval)
+      clearInterval(countdownInterval);
     }
   }
-}
+};
 
 const stopPlayback = async () => {
   try {
-    const response = await axios.post('http://localhost:8080/api/keyboard/stop-playback')
+    const response = await axios.post(
+      "http://localhost:8080/api/keyboard/stop-playback",
+    );
     if (response.status === 200) {
-      isPlaying.value = false
+      isPlaying.value = false;
       snackbar.value = {
         show: true,
-        text: '停止播放',
-        color: 'success'
-      }
+        text: "停止播放",
+        color: "success",
+      };
     }
   } catch (error) {
-    console.error('停止播放失敗:', error)
+    console.error("停止播放失敗:", error);
     snackbar.value = {
       show: true,
-      text: '停止播放失敗',
-      color: 'error'
-    }
+      text: "停止播放失敗",
+      color: "error",
+    };
   }
-}
+};
 
 const startKeyPolling = () => {
-  keyPollingInterval = setInterval(updateCurrentKeys, 100)
-}
+  keyPollingInterval = setInterval(updateCurrentKeys, 100);
+};
 
 const stopKeyPolling = () => {
   if (keyPollingInterval) {
-    clearInterval(keyPollingInterval)
-    keyPollingInterval = null
+    clearInterval(keyPollingInterval);
+    keyPollingInterval = null;
   }
-}
+};
 
 const formatRelativeTime = (timestamp, startTime) => {
-  const diff = timestamp - startTime
-  const seconds = Math.floor(diff / 1000)
-  const milliseconds = diff % 1000
-  return `${seconds}.${milliseconds.toString().padStart(3, '0')}秒`
-}
+  const diff = timestamp - startTime;
+  const seconds = Math.floor(diff / 1000);
+  const milliseconds = diff % 1000;
+  return `${seconds}.${milliseconds.toString().padStart(3, "0")}秒`;
+};
 
 const checkPlayStatus = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/keyboard/playback-status')
+    const response = await axios.get(
+      "http://localhost:8080/api/keyboard/playback-status",
+    );
     if (response.status === 200) {
-      const status = response.data
-      isPlaying.value = status.isPlaying
-      currentLoop.value = status.currentLoop
-      
+      const status = response.data;
+      isPlaying.value = status.isPlaying;
+      currentLoop.value = status.currentLoop;
+
       // 更新當前播放的按鍵
       if (isPlaying.value) {
-        currentPlayingKey.value = status.currentEvent
-        currentPlayingIndex.value = status.currentIndex
-        
+        currentPlayingKey.value = status.currentEvent;
+        currentPlayingIndex.value = status.currentIndex;
+
         // 更新當前按下的按鍵列表
         if (status.currentEvent) {
-          console.log('Current event:', status.currentEvent)
-          if (status.currentEvent.action === 'PRESS') {
+          console.log("Current event:", status.currentEvent);
+          if (status.currentEvent.action === "PRESS") {
             if (!currentPressedKeys.value.includes(status.currentEvent.key)) {
-              currentPressedKeys.value = [...currentPressedKeys.value, status.currentEvent.key]
-              console.log('Added key:', status.currentEvent.key)
+              currentPressedKeys.value = [
+                ...currentPressedKeys.value,
+                status.currentEvent.key,
+              ];
+              console.log("Added key:", status.currentEvent.key);
             }
-          } else if (status.currentEvent.action === 'RELEASE') {
-            currentPressedKeys.value = currentPressedKeys.value.filter(key => key !== status.currentEvent.key)
-            console.log('Removed key:', status.currentEvent.key)
+          } else if (status.currentEvent.action === "RELEASE") {
+            currentPressedKeys.value = currentPressedKeys.value.filter(
+              (key) => key !== status.currentEvent.key,
+            );
+            console.log("Removed key:", status.currentEvent.key);
           }
         }
       } else {
-        currentPlayingKey.value = null
-        currentPlayingIndex.value = -1
-        currentPressedKeys.value = []
+        currentPlayingKey.value = null;
+        currentPlayingIndex.value = -1;
+        currentPressedKeys.value = [];
       }
-      
+
       if (!isPlaying.value) {
-        stopStatusCheck()
+        stopStatusCheck();
         snackbar.value = {
           show: true,
-          text: '腳本播放完成',
-          color: 'success'
-        }
+          text: "腳本播放完成",
+          color: "success",
+        };
       }
     }
   } catch (error) {
-    console.error('檢查播放狀態失敗:', error)
-    stopStatusCheck()
-    isPlaying.value = false
-    currentPlayingKey.value = null
-    currentPlayingIndex.value = -1
-    currentPressedKeys.value = []
+    console.error("檢查播放狀態失敗:", error);
+    stopStatusCheck();
+    isPlaying.value = false;
+    currentPlayingKey.value = null;
+    currentPlayingIndex.value = -1;
+    currentPressedKeys.value = [];
   }
-}
+};
 
 const startStatusCheck = () => {
-  stopStatusCheck()
-  statusCheckInterval = setInterval(checkPlayStatus, 100)
-}
+  stopStatusCheck();
+  statusCheckInterval = setInterval(checkPlayStatus, 100);
+};
 
 const stopStatusCheck = () => {
   if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
+    clearInterval(statusCheckInterval);
+    statusCheckInterval = null;
   }
-}
+};
 
 const toggleScheduledKey = async (index) => {
   const key = scheduledKeys.value[index];
   if (key.isRunning) {
     try {
-      await axios.post(`http://localhost:8080/api/keyboard/scheduled-key/stop?taskId=task_${index}`);
+      await axios.post(
+        `http://localhost:8080/api/keyboard/scheduled-key/stop?taskId=task_${index}`,
+      );
       key.isRunning = false;
-      key.taskId = '';
+      key.taskId = "";
       key.countdown = 0;
       snackbar.value = {
         show: true,
-        text: '定時按鍵已停止',
-        color: 'success'
+        text: "定時按鍵已停止",
+        color: "success",
       };
     } catch (error) {
-      console.error('停止定時按鍵失敗:', error);
+      console.error("停止定時按鍵失敗:", error);
       snackbar.value = {
         show: true,
-        text: '停止定時按鍵失敗',
-        color: 'error'
+        text: "停止定時按鍵失敗",
+        color: "error",
       };
     }
   } else {
     if (!key.key || !key.interval) {
       snackbar.value = {
         show: true,
-        text: '請輸入按鍵和間隔時間',
-        color: 'error'
+        text: "請輸入按鍵和間隔時間",
+        color: "error",
       };
       return;
     }
     try {
       const taskId = `task_${index}`;
-      await axios.post(`http://localhost:8080/api/keyboard/scheduled-key/start`, null, {
-        params: {
-          taskId,
-          key: key.key,
-          intervalSeconds: parseInt(key.interval)
-        }
-      });
+      await axios.post(
+        `http://localhost:8080/api/keyboard/scheduled-key/start`,
+        null,
+        {
+          params: {
+            taskId,
+            key: key.key,
+            intervalSeconds: parseInt(key.interval),
+          },
+        },
+      );
       key.isRunning = true;
       key.taskId = taskId;
       key.lastPressTime = Date.now();
@@ -988,15 +1158,15 @@ const toggleScheduledKey = async (index) => {
       startCountdown(index);
       snackbar.value = {
         show: true,
-        text: '定時按鍵已啟動',
-        color: 'success'
+        text: "定時按鍵已啟動",
+        color: "success",
       };
     } catch (error) {
-      console.error('啟動定時按鍵失敗:', error);
+      console.error("啟動定時按鍵失敗:", error);
       snackbar.value = {
         show: true,
-        text: '啟動定時按鍵失敗',
-        color: 'error'
+        text: "啟動定時按鍵失敗",
+        color: "error",
       };
     }
   }
@@ -1008,13 +1178,13 @@ const startCountdown = (index) => {
 
   const updateCountdown = () => {
     if (!key.isRunning) return;
-    
+
     const now = Date.now();
     const elapsed = Math.floor((now - key.lastPressTime) / 1000);
     const remaining = Math.max(0, parseInt(key.interval) - elapsed);
-    
+
     key.countdown = remaining;
-    
+
     if (remaining > 0) {
       requestAnimationFrame(updateCountdown);
     } else {
@@ -1029,172 +1199,181 @@ const startCountdown = (index) => {
 
 const stopAllScheduledKeys = async () => {
   try {
-    await axios.post('http://localhost:8080/api/keyboard/scheduled-key/stop-all');
-    scheduledKeys.value.forEach(key => {
+    await axios.post(
+      "http://localhost:8080/api/keyboard/scheduled-key/stop-all",
+    );
+    scheduledKeys.value.forEach((key) => {
       key.isRunning = false;
-      key.taskId = '';
+      key.taskId = "";
     });
     snackbar.value = {
       show: true,
-      text: '所有定時按鍵已停止',
-      color: 'success'
+      text: "所有定時按鍵已停止",
+      color: "success",
     };
   } catch (error) {
-    console.error('停止所有定時按鍵失敗:', error);
+    console.error("停止所有定時按鍵失敗:", error);
     snackbar.value = {
       show: true,
-      text: '停止所有定時按鍵失敗',
-      color: 'error'
+      text: "停止所有定時按鍵失敗",
+      color: "error",
     };
   }
 };
 
 const getKeyIcon = (key) => {
   const keyIconMap = {
-    'Space': 'mdi-keyboard-space',
-    'Enter': 'mdi-keyboard-return',
-    'Escape': 'mdi-keyboard-esc',
-    'Tab': 'mdi-keyboard-tab',
-    'Backspace': 'mdi-keyboard-backspace',
-    'Delete': 'mdi-keyboard-delete',
-    'Insert': 'mdi-keyboard-insert',
-    'Home': 'mdi-keyboard-home',
-    'End': 'mdi-keyboard-end',
-    'PageUp': 'mdi-keyboard-page-up',
-    'PageDown': 'mdi-keyboard-page-down',
-    'Left': 'mdi-arrow-left-bold',
-    'Right': 'mdi-arrow-right-bold',
-    'Up': 'mdi-arrow-up-bold',
-    'Down': 'mdi-arrow-down-bold',
-    'Shift': 'mdi-keyboard-shift',
-    'Ctrl': 'mdi-keyboard-control',
-    'Alt': 'mdi-keyboard-alt',
-    'Windows': 'mdi-microsoft-windows',
-    'Command': 'mdi-apple-keyboard-command',
-    'NumLock': 'mdi-keyboard-num-lock',
-    'ScrollLock': 'mdi-keyboard-scroll-lock',
-    'CapsLock': 'mdi-keyboard-caps-lock',
-    'PrintScreen': 'mdi-printer',
-    'Pause': 'mdi-pause',
-    'ContextMenu': 'mdi-menu',
-    'NumPad0': 'mdi-numeric-0',
-    'NumPad1': 'mdi-numeric-1',
-    'NumPad2': 'mdi-numeric-2',
-    'NumPad3': 'mdi-numeric-3',
-    'NumPad4': 'mdi-numeric-4',
-    'NumPad5': 'mdi-numeric-5',
-    'NumPad6': 'mdi-numeric-6',
-    'NumPad7': 'mdi-numeric-7',
-    'NumPad8': 'mdi-numeric-8',
-    'NumPad9': 'mdi-numeric-9',
-    'NumPadAdd': 'mdi-plus',
-    'NumPadSubtract': 'mdi-minus',
-    'NumPadMultiply': 'mdi-multiplication',
-    'NumPadDivide': 'mdi-division',
-    'NumPadDecimal': 'mdi-decimal',
-    'NumPadEnter': 'mdi-keyboard-return'
+    Space: "mdi-keyboard-space",
+    Enter: "mdi-keyboard-return",
+    Escape: "mdi-keyboard-esc",
+    Tab: "mdi-keyboard-tab",
+    Backspace: "mdi-keyboard-backspace",
+    Delete: "mdi-keyboard-delete",
+    Insert: "mdi-keyboard-insert",
+    Home: "mdi-keyboard-home",
+    End: "mdi-keyboard-end",
+    PageUp: "mdi-keyboard-page-up",
+    PageDown: "mdi-keyboard-page-down",
+    Left: "mdi-arrow-left-bold",
+    Right: "mdi-arrow-right-bold",
+    Up: "mdi-arrow-up-bold",
+    Down: "mdi-arrow-down-bold",
+    Shift: "mdi-keyboard-shift",
+    Ctrl: "mdi-keyboard-control",
+    Alt: "mdi-keyboard-alt",
+    Windows: "mdi-microsoft-windows",
+    Command: "mdi-apple-keyboard-command",
+    NumLock: "mdi-keyboard-num-lock",
+    ScrollLock: "mdi-keyboard-scroll-lock",
+    CapsLock: "mdi-keyboard-caps-lock",
+    PrintScreen: "mdi-printer",
+    Pause: "mdi-pause",
+    ContextMenu: "mdi-menu",
+    NumPad0: "mdi-numeric-0",
+    NumPad1: "mdi-numeric-1",
+    NumPad2: "mdi-numeric-2",
+    NumPad3: "mdi-numeric-3",
+    NumPad4: "mdi-numeric-4",
+    NumPad5: "mdi-numeric-5",
+    NumPad6: "mdi-numeric-6",
+    NumPad7: "mdi-numeric-7",
+    NumPad8: "mdi-numeric-8",
+    NumPad9: "mdi-numeric-9",
+    NumPadAdd: "mdi-plus",
+    NumPadSubtract: "mdi-minus",
+    NumPadMultiply: "mdi-multiplication",
+    NumPadDivide: "mdi-division",
+    NumPadDecimal: "mdi-decimal",
+    NumPadEnter: "mdi-keyboard-return",
   };
 
   // 如果是字母鍵，使用字母圖示
   if (/^[A-Z]$/.test(key)) {
-    return 'mdi-alpha-' + key.toLowerCase() + '-box';
+    return "mdi-alpha-" + key.toLowerCase() + "-box";
   }
   // 如果是數字鍵，使用數字圖示
   if (/^[0-9]$/.test(key)) {
-    return 'mdi-numeric-' + key + '-box';
+    return "mdi-numeric-" + key + "-box";
   }
   // 如果是功能鍵，使用功能鍵圖示
   if (/^F[0-9]+$/.test(key)) {
-    return 'mdi-function';
+    return "mdi-function";
   }
 
-  return keyIconMap[key] || 'mdi-keyboard';
+  return keyIconMap[key] || "mdi-keyboard";
 };
 
 const renameScript = (oldName) => {
-  scriptToRename.value = oldName
-  newScriptName.value = oldName
-  renameError.value = ''
-  renameDialogVisible.value = true
-}
+  scriptToRename.value = oldName;
+  newScriptName.value = oldName;
+  renameError.value = "";
+  renameDialogVisible.value = true;
+};
 
 const confirmRename = async () => {
   if (!newScriptName.value.trim()) {
-    renameError.value = '腳本名稱不能為空'
-    return
+    renameError.value = "腳本名稱不能為空";
+    return;
   }
 
   if (newScriptName.value === scriptToRename.value) {
-    renameDialogVisible.value = false
-    return
+    renameDialogVisible.value = false;
+    return;
   }
 
   try {
-    const response = await axios.post(`http://localhost:8080/api/keyboard/rename-script`, null, {
-      params: {
-        oldName: scriptToRename.value,
-        newName: newScriptName.value
-      }
-    })
-    
+    const response = await axios.post(
+      `http://localhost:8080/api/keyboard/rename-script`,
+      null,
+      {
+        params: {
+          oldName: scriptToRename.value,
+          newName: newScriptName.value,
+        },
+      },
+    );
+
     if (response.status === 200) {
       snackbar.value = {
         show: true,
-                        text: '腳本改名成功',
-        color: 'success'
-      }
-      renameDialogVisible.value = false
-      await refreshScriptList()
-      
-              // 如果當前載入的是被改名的腳本，更新載入的腳本名稱
-      if (loadedScript.value && loadedScript.value.name === scriptToRename.value) {
-        loadedScript.value.name = newScriptName.value
+        text: "腳本改名成功",
+        color: "success",
+      };
+      renameDialogVisible.value = false;
+      await refreshScriptList();
+
+      // 如果當前載入的是被改名的腳本，更新載入的腳本名稱
+      if (
+        loadedScript.value &&
+        loadedScript.value.name === scriptToRename.value
+      ) {
+        loadedScript.value.name = newScriptName.value;
       }
     }
   } catch (error) {
-            console.error('改名腳本失敗:', error)
-        renameError.value = error.response?.data || '改名腳本失敗'
+    console.error("改名腳本失敗:", error);
+    renameError.value = error.response?.data || "改名腳本失敗";
   }
-}
+};
 
 onMounted(() => {
-  refreshScriptList()
-  window.addEventListener('keydown', (event) => {
+  refreshScriptList();
+  window.addEventListener("keydown", (event) => {
     if (activeKeyField.value !== null) {
       handleKeyDown(event, activeKeyField.value);
     }
   });
-  window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && isPlaying.value) {
-      stopPlayback()
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isPlaying.value) {
+      stopPlayback();
     }
-  })
-})
+  });
+});
 
 onUnmounted(() => {
-  stopKeyPolling()
+  stopKeyPolling();
   if (countdownInterval) {
-    clearInterval(countdownInterval)
+    clearInterval(countdownInterval);
   }
   if (statusInterval) {
-    clearInterval(statusInterval)
+    clearInterval(statusInterval);
   }
   if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
+    clearInterval(statusCheckInterval);
   }
-  stopAllScheduledKeys()
+  stopAllScheduledKeys();
   // 停止所有倒數計時
-  scheduledKeys.value.forEach(key => {
+  scheduledKeys.value.forEach((key) => {
     key.isRunning = false;
     key.countdown = 0;
   });
-  window.removeEventListener('keydown', handleKeyDown);
-  window.removeEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && isPlaying.value) {
-      stopPlayback()
+  window.removeEventListener("keydown", handleKeyDown);
+  window.removeEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isPlaying.value) {
+      stopPlayback();
     }
-  })
-})
+  });
+});
 </script>
 
 <style scoped>
@@ -1255,7 +1434,6 @@ onUnmounted(() => {
   transform: translateY(2px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 
 .key-text {
   font-size: 14px;
@@ -1425,4 +1603,24 @@ onUnmounted(() => {
     box-shadow: 0 0 0 0 rgba(0, 150, 136, 0);
   }
 }
-</style> 
+
+/* 腳本列表折疊相關樣式 */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+:deep(.v-expand-transition-enter-active),
+:deep(.v-expand-transition-leave-active) {
+  transition: all 0.3s ease;
+}
+
+:deep(.v-expand-transition-enter-from),
+:deep(.v-expand-transition-leave-to) {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
