@@ -75,6 +75,35 @@
             </template>
           </v-alert>
 
+          <!-- 視窗大小位置鎖定狀態 -->
+          <v-alert
+            v-if="windowStatus.isWindowSizePositionLocked"
+            type="warning"
+            variant="tonal"
+            class="mb-4"
+          >
+            <template v-slot:prepend>
+              <v-icon>mdi-lock-outline</v-icon>
+            </template>
+            <div>
+              <strong>已鎖定大小位置：</strong>{{ windowStatus.lockedSizePositionWindowTitle }}
+              <div class="text-caption mt-1">
+                視窗大小和位置已被鎖定，無法移動或調整大小
+              </div>
+            </div>
+            <template v-slot:append>
+              <v-btn
+                color="error"
+                variant="text"
+                size="small"
+                @click="unlockSizePosition"
+                prepend-icon="mdi-lock-open"
+              >
+                解鎖
+              </v-btn>
+            </template>
+          </v-alert>
+
           <!-- 視窗列表 -->
           <div v-if="windows.length === 0" class="text-center py-8">
             <v-icon size="large" color="grey" class="mb-2"
@@ -143,6 +172,15 @@
                       class="font-weight-bold"
                     >
                       編輯
+                    </v-btn>
+                    <v-btn
+                      :color="window.isSizePositionLocked ? 'error' : 'success'"
+                      size="x-small"
+                      @click="toggleSizePositionLock(window)"
+                      :prepend-icon="window.isSizePositionLocked ? 'mdi-lock' : 'mdi-lock-open'"
+                      class="font-weight-bold"
+                    >
+                      {{ window.isSizePositionLocked ? '解鎖' : '鎖定' }}
                     </v-btn>
                   </v-btn-group>
                 </td>
@@ -284,6 +322,8 @@ const windowStatus = ref({
   isLocked: false,
   lockedWindowTitle: "",
   isLockedWindowActive: false,
+  isWindowSizePositionLocked: false,
+  lockedSizePositionWindowTitle: "",
 });
 
 // 視窗編輯相關
@@ -306,6 +346,8 @@ const initializeData = () => {
     isLocked: false,
     lockedWindowTitle: "",
     isLockedWindowActive: false,
+    isWindowSizePositionLocked: false,
+    lockedSizePositionWindowTitle: "",
   };
 };
 
@@ -339,6 +381,16 @@ const getWindowStatus = async () => {
     const response = await axios.get("http://localhost:8080/api/window/status");
     if (response.data) {
       windowStatus.value = response.data;
+    }
+    
+    // 獲取大小位置鎖定狀態
+    const sizePositionResponse = await axios.get("http://localhost:8080/api/window/size-position-status");
+    if (sizePositionResponse.data) {
+      // 更新視窗列表中的鎖定狀態
+      windows.value.forEach(window => {
+        window.isSizePositionLocked = sizePositionResponse.data.isSizePositionLocked && 
+          window.title === sizePositionResponse.data.lockedSizePositionWindowTitle;
+      });
     }
   } catch (error) {
     console.error("獲取視窗狀態失敗:", error);
@@ -613,6 +665,65 @@ const saveWindowChanges = async () => {
     snackbar.value = {
       show: true,
       text: error.response?.data || "修改視窗失敗",
+      color: "error",
+    };
+  }
+};
+
+// 鎖定/解鎖大小位置
+const toggleSizePositionLock = async (window) => {
+  try {
+    let response;
+    if (window.isSizePositionLocked) {
+      // 解鎖
+      response = await axios.post("http://localhost:8080/api/window/unlock-size-position");
+    } else {
+      // 鎖定
+      response = await axios.post(
+        "http://localhost:8080/api/window/lock-size-position",
+        null,
+        {
+          params: { windowHandle: window.handle },
+        },
+      );
+    }
+
+    if (response.status === 200) {
+      window.isSizePositionLocked = !window.isSizePositionLocked;
+      snackbar.value = {
+        show: true,
+        text: `視窗大小位置已${window.isSizePositionLocked ? '鎖定' : '解鎖'}`,
+        color: "success",
+      };
+      await getWindowStatus(); // 更新狀態
+    }
+  } catch (error) {
+    console.error("鎖定/解鎖大小位置失敗:", error);
+    snackbar.value = {
+      show: true,
+      text: error.response?.data || "鎖定/解鎖大小位置失敗",
+      color: "error",
+    };
+  }
+};
+
+// 解鎖大小位置
+const unlockSizePosition = async () => {
+  try {
+    const response = await axios.post("http://localhost:8080/api/window/unlock-size-position");
+    if (response.status === 200) {
+      snackbar.value = {
+        show: true,
+        text: "視窗大小位置已解鎖",
+        color: "success",
+      };
+      await getWindowStatus(); // 更新狀態
+    }
+  } catch (error) {
+    console.error("解鎖大小位置失敗:", error);
+    snackbar.value = {
+      show: true,
+      text: error.response?.data || "解鎖大小位置失敗",
       color: "error",
     };
   }
